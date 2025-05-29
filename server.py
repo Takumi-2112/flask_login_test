@@ -71,7 +71,7 @@ def get_all_users():
       
 
 # get user by email
-@app.route('/user/<string:email>', methods=['GET'])
+@app.route('/user/email/<string:email>', methods=['GET'])
 def get_user_by_email(email):
     try:
         query = load_sql('get_user_by_email_query')
@@ -85,7 +85,7 @@ def get_user_by_email(email):
         return jsonify({"error": str(e)}), 400
 
 # get user by username
-@app.route('/user/<string:username>', methods=['GET'])
+@app.route('/username/<string:username>', methods=['GET'])
 def get_user_by_username(username):
     try:
         query = load_sql('get_user_by_username_query')
@@ -106,18 +106,24 @@ def get_user_by_username(username):
 # DELETE
 
 # delete user
-@app.route('/delete/<string:username>', methods=['DELETE'])
-def delete_user(username):
+@app.route('/delete/<int:user_id>', methods=['DELETE'])
+def delete_user(user_id):
     try:
         query = load_sql('delete_user_query')
-        cur.execute(query, (username,))
+        cur.execute(query, (user_id,))
+        conn.commit()  # Added explicit commit
         if cur.rowcount > 0:
-            return jsonify({"message": f"User '{username}' deleted successfully"}), 200
-        else:
-            return jsonify({"error": "User not found"}), 404
+            return jsonify({"message": f"User {user_id} deleted successfully"}), 200
+        return jsonify({"error": "User not found"}), 404
     except Exception as e:
+        conn.rollback()
         return jsonify({"error": str(e)}), 400
 
+# Add route debug before running
+print("\n⚡ Registered routes:")
+for rule in app.url_map.iter_rules():
+    print(f"{rule.methods} {rule}")
+print()
 
 if __name__ == '__main__':
     app.run(debug=True)
