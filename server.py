@@ -2,15 +2,19 @@ from flask import Flask, request, jsonify
 import psycopg2
 import os 
 from werkzeug.security import generate_password_hash
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 app = Flask(__name__)
 
 #setup pg db connection
 conn = psycopg2.connect(
-  dbname = 'flask_test_users',
-  user= os.getenv('FLASK_DB_USER'),
-  password= os.getenv('FLASK_DB_PASSWORD'),
-  host= os.getenv('FLASK_DB_HOST'),
+  dbname = os.getenv('FLASK_DB_NAME'), 
+  user= os.getenv('FLASK_DB_USER'), 
+  password= os.getenv('FLASK_DB_PASSWORD'), 
+  host= os.getenv('FLASK_DB_HOST'), 
   port= os.getenv('FLASK_DB_PORT', '5432')
 )
 
@@ -85,7 +89,7 @@ def get_user_by_email(email):
         return jsonify({"error": str(e)}), 400
 
 # get user by username
-@app.route('/username/<string:username>', methods=['GET'])
+@app.route('/user/username/<string:username>', methods=['GET'])
 def get_user_by_username(username):
     try:
         query = load_sql('get_user_by_username_query')
